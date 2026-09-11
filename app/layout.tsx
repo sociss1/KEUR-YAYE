@@ -6,5 +6,8 @@ export const metadata: Metadata = {
   description: 'Oud, eaux de parfum et essences de caractère. Livraison à Dakar et partout au Sénégal.',
   openGraph: { title: 'KEUR YAYE — Parfumerie sénégalaise', description: 'Oud, eaux de parfum et essences de caractère.', images: ['/og.png'], locale: 'fr_SN', type: 'website' },
   twitter: { card: 'summary_large_image', title: 'KEUR YAYE — Parfumerie sénégalaise', description: 'Oud, eaux de parfum et essences de caractère.', images: ['/og.png'] },
+  manifest: '/manifest.webmanifest',
+  icons: { icon: '/favicon.svg', apple: '/app-icon.svg' },
+  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'KEUR YAYE' },
 };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="fr"><body>{children}</body></html>; }
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="fr"><head><meta name="theme-color" content="#0b2118"/><meta name="mobile-web-app-capable" content="yes"/></head><body>{children}</body></html>; }

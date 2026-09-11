@@ -75,7 +75,7 @@ export async function DELETE(request: Request) {
   const db = await ready();
   const id = Number(new URL(request.url).searchParams.get('id'));
   const image = await db.prepare('SELECT object_key AS objectKey FROM product_images WHERE product_id=?').bind(id).first<{objectKey:string}>();
-  if (image?.objectKey) await env.ASSETS.delete(image.objectKey);
+  if (image?.objectKey) await env.PRODUCT_IMAGES.delete(image.objectKey);
   await db.batch([
     db.prepare('DELETE FROM product_images WHERE product_id=?').bind(id),
     db.prepare('DELETE FROM products WHERE id=?').bind(id),
