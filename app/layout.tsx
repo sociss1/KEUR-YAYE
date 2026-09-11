@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://keur-yaye-parfumerie.csamba625.chatgpt.site'),
@@ -10,4 +10,5 @@ export const metadata: Metadata = {
   icons: { icon: '/favicon.svg', apple: '/app-icon.svg' },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'KEUR YAYE' },
 };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#0b2118' };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="fr"><head><meta name="theme-color" content="#0b2118"/><meta name="mobile-web-app-capable" content="yes"/></head><body>{children}</body></html>; }

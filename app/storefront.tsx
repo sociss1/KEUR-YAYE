@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDownRight, Check, Download, ImageIcon, LockKeyhole, Minus, Plus, ShoppingBag, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,7 @@ export default function Storefront(){
   const [password,setPassword]=useState(''),[adminOk,setAdminOk]=useState(false),[adminError,setAdminError]=useState(''),[tab,setTab]=useState<'products'|'orders'>('products');
   const [orders,setOrders]=useState<Order[]>([]),[form,setForm]=useState({name:'',price:'',category:'parfum-corps',note:'',tone:'gold'});
   const [installPrompt,setInstallPrompt]=useState<InstallPromptEvent|null>(null),[uploading,setUploading]=useState<number|null>(null);
+  const cartTouchStart=useRef(0);
   const loadProducts=()=>fetch('/api/store').then(r=>r.ok?r.json():Promise.reject()).then(setProducts).catch(()=>setProducts(fallback));
   useEffect(()=>{loadProducts();const capture=(event:Event)=>{event.preventDefault();setInstallPrompt(event as InstallPromptEvent)};window.addEventListener('beforeinstallprompt',capture);return()=>window.removeEventListener('beforeinstallprompt',capture)},[]);
   const items=useMemo(()=>Object.entries(cart).flatMap(([id,qty])=>{const p=products.find(x=>x.id===Number(id));return p?[{...p,qty}]:[]}),[cart,products]);
@@ -56,7 +57,7 @@ export default function Storefront(){
     <section id="top" className="hero">
       <div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/>
       <div className="hero-copy"><p className="eyebrow">Parfumerie sénégalaise · Dakar</p><h1>Le parfum,<br/><span>mémoire</span> d&apos;une maison.</h1><p className="hero-lede">Des oud et des eaux de parfum composés pour laisser une présence — intime, précieuse, inoubliable.</p><div className="hero-actions"><a className="primary-action" href="#collection">Découvrir la collection <ArrowDownRight size={17}/></a><a className="text-action" href="https://wa.me/221780136079">Commander sur WhatsApp</a></div></div>
-      <div className="hero-product"><p>La signature</p><Bottle tone="gold"/><span>Oud El Malick</span></div><p className="hero-index">01 — 05</p>
+      <div className="hero-product"><Bottle tone="gold"/><span>Oud El Malick</span></div><p className="hero-index">01 — 05</p>
     </section>
     <section id="collection" className="collection">
       <div className="section-heading"><div><p className="eyebrow">La collection</p><h2>Des essences qui<br/><em>vous ressemblent.</em></h2></div><p>Une sélection pensée à Dakar, entre chaleur des bois, fleurs solaires et sillages enveloppants.</p></div>
@@ -65,7 +66,7 @@ export default function Storefront(){
     </section>
     <section id="histoire" className="story"><div className="story-mark"><span>KY</span></div><div><p className="eyebrow">Notre maison</p><h2>Une <em>signature</em>,<br/>pas un simple flacon.</h2><p>KEUR YAYE — « la maison de Yaye » — est née du désir d&apos;offrir une parfumerie fidèle aux goûts sénégalais, choisie avec la même exigence qu&apos;un bijou de famille.</p><div className="story-facts"><span><b>Dakar</b>Maison d&apos;origine</span><span><b>Sénégal</b>Livraison nationale</span></div></div></section>
     <footer className="site-footer"><div className="footer-brand"><span className="monogram">KY</span><p>KEUR <em>YAYE</em></p></div><p>Oud, eaux de parfum et essences de caractère.<br/>Livraison à Dakar et partout au Sénégal.</p><div><a href="tel:+221780136079">+221 78 013 60 79</a><a href="https://wa.me/221780136079">WhatsApp</a><button onClick={()=>setAdminOpen(true)}>Gérer la boutique</button></div><small>© 2026 KEUR YAYE · Dakar, Sénégal</small></footer>
-    <Sheet open={cartOpen} onOpenChange={setCartOpen}><SheetContent className="cart-sheet">
+    <Sheet open={cartOpen} onOpenChange={setCartOpen}><SheetContent className="cart-sheet" onTouchStart={e=>{cartTouchStart.current=e.touches[0].clientX}} onTouchEnd={e=>{if(e.changedTouches[0].clientX-cartTouchStart.current < -55){setCartOpen(false);window.location.hash='top'}}}>
       <SheetHeader><SheetTitle>Votre panier</SheetTitle><SheetDescription>{count?`${count} article${count>1?'s':''} sélectionné${count>1?'s':''}`:'Votre sélection est vide'}</SheetDescription></SheetHeader>
       <div className="cart-list">{items.length===0?<div className="empty"><ShoppingBag/><p>Votre panier est vide.</p><button onClick={()=>setCartOpen(false)}>Découvrir les parfums</button></div>:items.map(item=><div className="cart-line" key={item.id}><div className="cart-thumb"><Bottle tone={item.tone}/></div><div><h4>{item.name}</h4><p>{money(item.price)}</p><div className="quantity"><Button size="icon-xs" variant="outline" onClick={()=>qty(item.id,-1)} aria-label="Diminuer"><Minus/></Button><span>{item.qty}</span><Button size="icon-xs" variant="outline" onClick={()=>qty(item.id,1)} aria-label="Augmenter"><Plus/></Button></div></div><Button className="remove" variant="ghost" size="icon-sm" onClick={()=>setCart(c=>{const n={...c};delete n[item.id];return n})} aria-label={`Retirer ${item.name}`}><Trash2/></Button></div>)}</div>
       <div className="cart-total"><div><span>Total</span><strong>{money(total)}</strong></div><Button disabled={!items.length} onClick={()=>{setCartOpen(false);setCheckoutOpen(true);setConfirmed(false)}}>Passer la commande</Button><a className={items.length?'':'disabled'} href={items.length?whatsapp:undefined}>Ou commander par WhatsApp</a></div>
