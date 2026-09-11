@@ -23,7 +23,7 @@ const fallback:Product[]=[
 const categories=[['all','Tout voir'],['parfum-corps','Parfums de corps'],['deodorant','Déodorants'],['parfum-chambre','Parfums de chambre'],['huile','Huiles'],['coffret','Coffrets']];
 const categoryName=(key:string)=>categories.find(([id])=>id===key)?.[1]||key;
 const money=(n:number)=>`${new Intl.NumberFormat('fr-FR').format(n)} F`;
-function BrandLogo({className='' }:{className?:string}){return <img className={`official-logo ${className}`} src="/logo-keur-yaye.jpg" alt="Logo KEUR YAYE"/>}
+function BrandLogo({className='' }:{className?:string}){return <img className={`official-logo ${className}`} src="/logo-ky.png" alt="Monogramme KY"/>}
 function Bottle({tone='gold'}:{tone?:string}){return <div className={`bottle bottle-${tone}`} aria-hidden="true"><span className="bottle-cap"/><span className="bottle-neck"/><span className="bottle-glass"><span className="bottle-label"><BrandLogo className="bottle-brand"/></span></span></div>}
 
 export default function Storefront(){
