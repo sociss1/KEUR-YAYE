@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: { title: 'KEUR YAYE — Parfumerie sénégalaise', description: 'Oud, eaux de parfum et essences de caractère.', images: ['/og.png'], locale: 'fr_SN', type: 'website' },
   twitter: { card: 'summary_large_image', title: 'KEUR YAYE — Parfumerie sénégalaise', description: 'Oud, eaux de parfum et essences de caractère.', images: ['/og.png'] },
   manifest: '/manifest.webmanifest',
-  icons: { icon: '/favicon.svg', apple: '/app-icon.svg' },
+  icons: { icon: '/logo-keur-yaye.jpg', apple: '/logo-keur-yaye.jpg' },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'KEUR YAYE' },
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#0b2118' };
