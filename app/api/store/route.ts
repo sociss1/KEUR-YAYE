@@ -2,11 +2,15 @@ import { env } from 'cloudflare:workers';
 import { NextResponse } from 'next/server';
 
 const seeds = [
-  ['Oud El Malick',17000,'homme','Oud puissant et boisé, sillage affirmé.','amber',1],
-  ['Rose de Yaye',15000,'femme','Rose épanouie relevée de notes ambrées.','rose',0],
-  ['Nuit Dorée',19000,'unisexe','Vanille, musc et une pointe de safran.','gold',0],
-  ['Fleur de Thiès',14000,'femme','Fleurs blanches, fraîches et lumineuses.','rose',0],
-  ['Sillage Royal',21000,'homme','Cuir et épices pour une présence marquée.','amber',0],
+  ['Oud El Malick',17000,'parfum-corps','Oud puissant et boisé, sillage affirmé.','amber',1],
+  ['Rose de Yaye',15000,'parfum-corps','Rose épanouie relevée de notes ambrées.','rose',0],
+  ['Nuit Dorée',19000,'parfum-corps','Vanille, musc et une pointe de safran.','gold',0],
+  ['Fleur de Thiès',14000,'parfum-corps','Fleurs blanches, fraîches et lumineuses.','rose',0],
+  ['Sillage Royal',21000,'parfum-corps','Cuir et épices pour une présence marquée.','amber',0],
+  ['Brume Ndar',7500,'deodorant','Une fraîcheur propre aux notes d’agrumes et de musc.','mint',0],
+  ['Keur Santal',12500,'parfum-chambre','Santal crémeux et ambre doux pour parfumer la maison.','violet',0],
+  ['Huile Mousso',9000,'huile','Huile parfumée concentrée, lumineuse et enveloppante.','rose',0],
+  ['Coffret Teranga',29000,'coffret','Trois signatures essentielles réunies dans un coffret cadeau.','gold',0],
 ] as const;
 
 async function ready() {
@@ -17,8 +21,8 @@ async function ready() {
     db.prepare("CREATE INDEX IF NOT EXISTS idx_orders_open_status ON orders(status) WHERE status != 'traitée'"),
     db.prepare('PRAGMA optimize'),
   ]);
-  const row = await db.prepare('SELECT COUNT(*) AS count FROM products').first<{count:number}>();
-  if (!row?.count) await db.batch(seeds.map(p => db.prepare('INSERT INTO products (name,price,category,note,tone,featured) VALUES (?,?,?,?,?,?)').bind(...p)));
+  await db.prepare("UPDATE products SET category='parfum-corps' WHERE category IN ('homme','femme','unisexe')").run();
+  await db.batch(seeds.map(p => db.prepare('INSERT INTO products (name,price,category,note,tone,featured) SELECT ?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM products WHERE name=?)').bind(...p,p[0])));
   return db;
 }
 
