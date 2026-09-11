@@ -18,6 +18,7 @@ async function ready() {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS products (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, price INTEGER NOT NULL, category TEXT NOT NULL, note TEXT NOT NULL, tone TEXT NOT NULL DEFAULT 'gold', featured INTEGER NOT NULL DEFAULT 0)"),
     db.prepare("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY AUTOINCREMENT, customer_name TEXT NOT NULL, phone TEXT NOT NULL, items TEXT NOT NULL, total INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'nouvelle', created_at TEXT NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS product_images (product_id INTEGER PRIMARY KEY, object_key TEXT NOT NULL, content_type TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_orders_open_status ON orders(status) WHERE status != 'traitée'"),
     db.prepare('PRAGMA optimize'),
   ]);
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
     const result = await db.prepare('SELECT id, customer_name AS customerName, phone, items, total, status, created_at AS createdAt FROM orders ORDER BY id DESC').all();
     return NextResponse.json(result.results.map((o:any)=>({...o,items:JSON.parse(o.items)})));
   }
-  const result = await db.prepare('SELECT id,name,price,category,note,tone,featured FROM products ORDER BY id').all();
+  const result = await db.prepare('SELECT p.id,p.name,p.price,p.category,p.note,p.tone,p.featured,CASE WHEN i.product_id IS NULL THEN 0 ELSE 1 END AS hasImage,i.updated_at AS imageVersion FROM products p LEFT JOIN product_images i ON i.product_id=p.id ORDER BY p.id').all();
   return NextResponse.json(result.results.map((p:any)=>({...p,featured:Boolean(p.featured)})));
 }
 
@@ -72,6 +73,12 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   if (!(await isAdmin(request))) return NextResponse.json({ error: 'Accès refusé' }, { status: 401 });
   const db = await ready();
-  await db.prepare('DELETE FROM products WHERE id=?').bind(Number(new URL(request.url).searchParams.get('id'))).run();
+  const id = Number(new URL(request.url).searchParams.get('id'));
+  const image = await db.prepare('SELECT object_key AS objectKey FROM product_images WHERE product_id=?').bind(id).first<{objectKey:string}>();
+  if (image?.objectKey) await env.ASSETS.delete(image.objectKey);
+  await db.batch([
+    db.prepare('DELETE FROM product_images WHERE product_id=?').bind(id),
+    db.prepare('DELETE FROM products WHERE id=?').bind(id),
+  ]);
   return NextResponse.json({ok:true});
 }

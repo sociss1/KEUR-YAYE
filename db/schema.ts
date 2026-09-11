@@ -9,3 +9,9 @@ export const orders = sqliteTable('orders', {
   phone: text('phone').notNull(), items: text('items').notNull(), total: integer('total').notNull(),
   status: text('status').notNull().default('nouvelle'), createdAt: text('created_at').notNull(),
 }, table => [index('idx_orders_status').on(table.status)]);
+export const productImages = sqliteTable('product_images', {
+  productId: integer('product_id').primaryKey(),
+  objectKey: text('object_key').notNull(),
+  contentType: text('content_type').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
