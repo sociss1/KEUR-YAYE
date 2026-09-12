@@ -1,6 +1,8 @@
 import { env } from 'cloudflare:workers';
 import { NextResponse } from 'next/server';
 
+const publicHeaders = { 'Access-Control-Allow-Origin': 'https://sociss1.github.io', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
+
 const seeds = [
   ['Oud El Malick',17000,'parfum-corps','Oud puissant et boisé, sillage affirmé.','amber',1],
   ['Rose de Yaye',15000,'parfum-corps','Rose épanouie relevée de notes ambrées.','rose',0],
@@ -44,8 +46,10 @@ export async function GET(request: Request) {
     return NextResponse.json(result.results.map((o:any)=>({...o,items:JSON.parse(o.items)})));
   }
   const result = await db.prepare('SELECT p.id,p.name,p.price,p.category,p.note,p.tone,p.featured,CASE WHEN i.product_id IS NULL THEN 0 ELSE 1 END AS hasImage,i.updated_at AS imageVersion FROM products p LEFT JOIN product_images i ON i.product_id=p.id ORDER BY p.id').all();
-  return NextResponse.json(result.results.map((p:any)=>({...p,featured:Boolean(p.featured)})));
+  return NextResponse.json(result.results.map((p:any)=>({...p,featured:Boolean(p.featured)})), { headers: publicHeaders });
 }
+
+export async function OPTIONS() { return new NextResponse(null, { status: 204, headers: publicHeaders }); }
 
 export async function POST(request: Request) {
   const db = await ready();
