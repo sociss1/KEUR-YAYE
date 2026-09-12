@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 export const metadata: Metadata = {
-  metadataBase: new URL('https://keur-yaye-parfumerie.csamba625.chatgpt.site'),
+  metadataBase: new URL('https://keur-yaye-boutique.oscisse369.workers.dev'),
   title: 'KEUR YAYE — Parfumerie sénégalaise',
   description: 'Oud, eaux de parfum et essences de caractère. Livraison à Dakar et partout au Sénégal.',
   openGraph: { title: 'KEUR YAYE — Parfumerie sénégalaise', description: 'Oud, eaux de parfum et essences de caractère.', images: ['/og.png'], locale: 'fr_SN', type: 'website' },
