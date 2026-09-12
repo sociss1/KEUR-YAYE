@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { NextResponse } from 'next/server';
+import { adminSessionCookie, isAdmin, validPassword } from '@/lib/admin-auth';
 
 const publicHeaders = { 'Access-Control-Allow-Origin': 'https://sociss1.github.io', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
 
@@ -29,15 +30,6 @@ async function ready() {
   return db;
 }
 
-async function isAdmin(request: Request) {
-  const configured = env.ADMIN_PASSWORD_HASH;
-  const password = request.headers.get('x-admin-password');
-  if (!configured || !password) return false;
-  const bytes = new TextEncoder().encode(password);
-  const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(b=>b.toString(16).padStart(2,'0')).join('');
-  return hash === configured;
-}
-
 export async function GET(request: Request) {
   const db = await ready();
   if (new URL(request.url).searchParams.get('orders') === '1') {
@@ -54,6 +46,10 @@ export async function OPTIONS() { return new NextResponse(null, { status: 204, h
 export async function POST(request: Request) {
   const db = await ready();
   const body = await request.json() as any;
+  if (body.action === 'login') {
+    if (!(await validPassword(String(body.password||'')))) return NextResponse.json({error:'Mot de passe incorrect'},{status:401});
+    return NextResponse.json({ok:true},{headers:{'set-cookie':await adminSessionCookie()}});
+  }
   if (body.action === 'order') {
     if (!body.customerName?.trim() || !body.phone?.trim() || !Array.isArray(body.items) || !body.items.length) return NextResponse.json({error:'Commande incomplète'}, {status:400});
     const items = body.items.map((i:any)=>({name:String(i.name),price:Number(i.price),qty:Math.max(1,Number(i.qty))}));

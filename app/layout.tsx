@@ -10,5 +10,5 @@ export const metadata: Metadata = {
   icons: { icon: '/logo-ky.png', apple: '/logo-ky.png' },
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'KEUR YAYE' },
 };
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#0b2118' };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, maximumScale: 1, userScalable: false, viewportFit: 'cover', themeColor: '#0b2118' };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="fr"><head><meta name="theme-color" content="#0b2118"/><meta name="mobile-web-app-capable" content="yes"/></head><body>{children}</body></html>; }

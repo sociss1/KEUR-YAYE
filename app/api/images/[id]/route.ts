@@ -1,13 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { NextResponse } from 'next/server';
-
-async function authorized(request:Request){
-  const password=request.headers.get('x-admin-password'),configured=env.ADMIN_PASSWORD_HASH;
-  if(!password||!configured)return false;
-  const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(password));
-  const hash=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
-  return hash===configured;
-}
+import { isAdmin } from '@/lib/admin-auth';
 
 export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
   const {id}=await params;
@@ -19,7 +12,7 @@ export async function GET(_:Request,{params}:{params:Promise<{id:string}>}){
 }
 
 export async function POST(request:Request,{params}:{params:Promise<{id:string}>}){
-  if(!(await authorized(request)))return NextResponse.json({error:'Accès refusé'},{status:401});
+  if(!(await isAdmin(request)))return NextResponse.json({error:'Accès refusé'},{status:401});
   const {id}=await params,productId=Number(id),form=await request.formData(),file=form.get('image');
   if(!(file instanceof File))return NextResponse.json({error:'Photo manquante'},{status:400});
   if(!['image/jpeg','image/png','image/webp'].includes(file.type))return NextResponse.json({error:'Format accepté : JPG, PNG ou WebP'},{status:400});
